@@ -77,10 +77,24 @@ namespace DatabasesHW
                         {
                             Keyboard updateKeyboard = context.Keyboards.Find(idNum);
 
+                            if (updateKeyboard != null)
+                            {
+                                // Ask user to reenter keyboard details
+                                Write("Enter the size of the keyboard: ");
+                                updateKeyboard.Size = Console.ReadLine();
+                                Write("Enter the sqitch type: ");
+                                updateKeyboard.SwitchType = Console.ReadLine();
+                                Write("enter the switch amount: ");
+                                updateKeyboard.SwitchAmount = int.Parse(Console.ReadLine());
+                                Write("Enter the lube type: ");
+                                updateKeyboard.Lube = Console.ReadLine();
 
+                                context.SaveChanges(); // Save the changes
+                            } else
+                            {
+                                WriteLine("That keyboard does not exist.");
+                            }
                         }
-
-
                             break;
 
                     case 4: // User deletes a keyboard in the database
@@ -120,6 +134,5 @@ namespace DatabasesHW
                 }
             } while (optionChoice != 6); // 6 quits the program
         }
-
     }
 }
