@@ -1,4 +1,5 @@
 ﻿using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 using static System.Console;
 
 namespace DatabasesHW
@@ -21,7 +22,7 @@ namespace DatabasesHW
             WriteLine("5. Remove all keyboards");
             WriteLine("6. Exit");
         }
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             int optionChoice;
             string size;
@@ -35,7 +36,7 @@ namespace DatabasesHW
             {
                 WriteLine("What would you like to do?");
                 PrintHeading();
-                WriteLine("Enter the number of your choice: ");
+                Write("Enter the number of your choice: ");
                 optionChoice = int.Parse(Console.ReadLine());
 
                 switch (optionChoice)
@@ -52,16 +53,16 @@ namespace DatabasesHW
 
                         using (KeyboardDbContext context = new KeyboardDbContext())
                         {
-                            Keyboard newKeyboard = new Keyboard(size, swType, swAmt, lube);
-                            context.Keyboards.Add(newKeyboard);
-                            context.SaveChanges();
+                            Keyboard newKeyboard = new Keyboard(size, swType, swAmt, lube); // new keyboard object
+                            await context.Keyboards.AddAsync(newKeyboard); // Add the keyboard to database
+                            await context.SaveChangesAsync(); // save changes
                         }
                         break;
 
                     case 2: // User lists the keyboards in the database
                         using (var context = new KeyboardDbContext())
                         {
-                            List<Keyboard> keyboards = context.Keyboards.ToList();
+                            List<Keyboard> keyboards = await context.Keyboards.ToListAsync();
                             foreach (var keyboard in keyboards) // Iterate through each keyboard
                             {
                                 WriteLine(keyboard); // List each keyboard
@@ -73,23 +74,23 @@ namespace DatabasesHW
                         Write("Enter the id of the keyboard you want to update: ");
                         idNum = int.Parse(Console.ReadLine());
 
-                        using (var context = new KeyboardDbContext()) // Still need to implement
+                        using (var context = new KeyboardDbContext())
                         {
-                            Keyboard updateKeyboard = context.Keyboards.Find(idNum);
+                            Keyboard updateKeyboard = await context.Keyboards.FindAsync(idNum); // Find the keyboard based on id
 
                             if (updateKeyboard != null)
                             {
                                 // Ask user to reenter keyboard details
                                 Write("Enter the size of the keyboard: ");
                                 updateKeyboard.Size = Console.ReadLine();
-                                Write("Enter the sqitch type: ");
+                                Write("Enter the switch type: ");
                                 updateKeyboard.SwitchType = Console.ReadLine();
                                 Write("enter the switch amount: ");
                                 updateKeyboard.SwitchAmount = int.Parse(Console.ReadLine());
                                 Write("Enter the lube type: ");
                                 updateKeyboard.Lube = Console.ReadLine();
 
-                                context.SaveChanges(); // Save the changes
+                                await context.SaveChangesAsync(); // Save the changes
                             } else
                             {
                                 WriteLine("That keyboard does not exist.");
@@ -103,12 +104,12 @@ namespace DatabasesHW
 
                         using (var context = new KeyboardDbContext())
                         {
-                            Keyboard deleteKeyboard = context.Keyboards.Find(idNum);
+                            Keyboard deleteKeyboard = await context.Keyboards.FindAsync(idNum);
 
                             if (deleteKeyboard != null)
                             {
                                 context.Keyboards.Remove(deleteKeyboard); // Remove the keyboard
-                                context.SaveChanges(); // Save the changes
+                                await context.SaveChangesAsync(); // Save the changes
                             } else
                             {
                                 WriteLine("That keyboard does not exist.");
@@ -119,9 +120,9 @@ namespace DatabasesHW
                     case 5: // User deletes all keyboards in the database
                         using (var context = new KeyboardDbContext())
                         {
-                            List<Keyboard> allKeyboards = context.Keyboards.ToList();
+                            List<Keyboard> allKeyboards = await context.Keyboards.ToListAsync();
                             context.Keyboards.RemoveRange(allKeyboards); // Remove all keyboards
-                            context.SaveChanges(); // Save the changes
+                            await context.SaveChangesAsync(); // Save the changes
                         }
                         break;
 
@@ -132,7 +133,7 @@ namespace DatabasesHW
                         WriteLine("Invalid option. Please try again.");
                         break;
                 }
-            } while (optionChoice != 6); // 6 quits the program
+            } while (optionChoice != 6); // Entering 6 exits the program
         }
     }
 }
